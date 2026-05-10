@@ -400,6 +400,35 @@ svg {
   line-height: 1.2;
   font-weight: 760;
 }
+
+.allocation-toggle {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #f6f9fd;
+}
+
+.allocation-toggle button {
+  min-width: 58px;
+  height: 26px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.allocation-toggle button.active {
+  color: var(--blue);
+  background: white;
+  box-shadow: 0 4px 12px rgba(20, 87, 217, 0.10);
+}
 .hint { display: block; color: var(--muted); font-size: 12px; margin-top: 5px; }
 .info {
   width: 17px;
@@ -478,6 +507,8 @@ select {
   border-radius: var(--radius);
   padding: 12px;
   min-width: 0;
+  max-height: 198px;
+  overflow: auto;
 }
 .allocation-row {
   display: grid;

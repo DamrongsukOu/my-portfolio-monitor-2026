@@ -53,6 +53,7 @@ const DATA_SHEETS = {
 };
 
 const colors = ["#0b4f9f", "#2f9e55", "#e5a91a", "#6d63c7", "#98a2b3", "#3b82f6", "#14b8a6"];
+let allocationMode = "sector";
 
 function excelDateToJs(serial) {
   if (serial instanceof Date) return serial;
@@ -263,23 +264,34 @@ function donutSegment(cx, cy, radius, innerRadius, startAngle, endAngle) {
   ].join(" ");
 }
 
-function renderAllocation() {
+function allocationEntries() {
+  if (allocationMode === "asset") {
+    return holdings
+      .filter(item => item.value > 0 && item.ticker !== "CASH")
+      .sort((a, b) => b.value - a.value)
+      .map(item => [item.ticker, item.value]);
+  }
   const grouped = holdings.reduce((acc, item) => {
-    acc[item.layer] = (acc[item.layer] || 0) + item.value;
+    if (item.value > 0) acc[item.layer] = (acc[item.layer] || 0) + item.value;
     return acc;
   }, {});
-  const entries = Object.entries(grouped).filter(([, value]) => value > 0);
+  return Object.entries(grouped).filter(([, value]) => value > 0);
+}
+
+function renderAllocation() {
+  const entries = allocationEntries();
   const total = entries.reduce((sum, [, value]) => sum + value, 0);
+  if (!total) return;
   let angle = 0;
   document.getElementById("allocationChart").innerHTML = entries.map(([layer, value], index) => {
     const next = angle + (value / total) * 360;
     const path = donutSegment(120, 120, 104, 56, angle, next);
     angle = next;
-    return `<path d="${path}" fill="${colors[index]}" stroke="#fff" stroke-width="3"/>`;
+    return `<path d="${path}" fill="${colors[index % colors.length]}" stroke="#fff" stroke-width="3"/>`;
   }).join("");
   document.getElementById("allocationLegend").innerHTML = entries.map(([layer, value], index) => {
     const pct = (value / total * 100).toFixed(1);
-    return `<div class="allocation-row"><i class="swatch" style="background:${colors[index]}"></i><span>${layer}</span><strong>${pct}%</strong></div>`;
+    return `<div class="allocation-row"><i class="swatch" style="background:${colors[index % colors.length]}"></i><span>${layer}</span><strong>${pct}%</strong></div>`;
   }).join("") + `<div class="allocation-row"><i></i><span>Total</span><strong>100.0%</strong></div>`;
 }
 
@@ -461,6 +473,13 @@ function bindInteractions() {
     filter = button.dataset.filter;
     document.querySelectorAll("#assetTabs button").forEach(tab => tab.classList.toggle("active", tab === button));
     renderHoldings(filter, search.value);
+  });
+  document.getElementById("allocationToggle").addEventListener("click", event => {
+    const button = event.target.closest("button");
+    if (!button) return;
+    allocationMode = button.dataset.allocation;
+    document.querySelectorAll("#allocationToggle button").forEach(toggle => toggle.classList.toggle("active", toggle === button));
+    renderAllocation();
   });
   search.addEventListener("input", () => renderHoldings(filter, search.value));
   document.getElementById("refreshButton").addEventListener("click", () => {
