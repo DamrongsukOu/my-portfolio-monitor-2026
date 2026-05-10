@@ -55,6 +55,7 @@
       <div class="sidebar-footer">
         <span>Last updated</span>
         <strong id="updatedAt">May 10, 2026 07:45 AM</strong>
+        <span id="dataStatus">Using saved data</span>
         <button class="refresh-button" id="refreshButton">
           <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.4 6.4M3 12A9 9 0 0 1 18.4 5.6"/><path d="M21 4v6h-6M3 20v-6h6"/></svg>
           <span>Refresh Data</span>
@@ -87,33 +88,33 @@
           <article class="kpi-card">
             <div class="kpi-icon blue"><svg viewBox="0 0 24 24"><path d="M5 17 17 5m-7 0h7v7"/></svg></div>
             <span class="kpi-label">Portfolio Value</span>
-            <strong>&#3647;5,311.28</strong>
-            <span class="kpi-sub">vs invested &#3647;4,700.03</span>
-            <span class="kpi-trend positive">+&#3647;611.25 (13.01%)</span>
+            <strong id="portfolioValue">&#3647;5,311.28</strong>
+            <span class="kpi-sub" id="investedLabel">vs invested &#3647;4,700.03</span>
+            <span class="kpi-trend positive" id="profitLabel">+&#3647;611.25 (13.01%)</span>
             <svg class="sparkline" viewBox="0 0 260 44" data-spark="nav"></svg>
           </article>
           <article class="kpi-card">
             <div class="kpi-icon green"><svg viewBox="0 0 24 24"><path d="M4 17 10 11l4 4 6-8"/><path d="M14 7h6v6"/></svg></div>
             <span class="kpi-label">Gain / Loss</span>
-            <strong class="positive">+&#3647;611.25</strong>
+            <strong class="positive" id="gainValue">+&#3647;611.25</strong>
             <span class="kpi-sub">Daily profit</span>
-            <span class="kpi-trend positive">+&#3647;161.75 today</span>
+            <span class="kpi-trend positive" id="dailyProfitLabel">+&#3647;161.75 today</span>
             <svg class="sparkline green-line" viewBox="0 0 260 44" data-spark="gain"></svg>
           </article>
           <article class="kpi-card">
             <div class="kpi-icon green"><svg viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="17" r="2"/></svg></div>
             <span class="kpi-label">Return %</span>
-            <strong class="positive">+13.01%</strong>
-            <span class="kpi-sub">IRR 361.54%</span>
-            <span class="kpi-trend positive">Daily change +2.955%</span>
+            <strong class="positive" id="returnValue">+13.01%</strong>
+            <span class="kpi-sub" id="irrLabel">IRR 361.54%</span>
+            <span class="kpi-trend positive" id="dailyChangeLabel">Daily change +2.955%</span>
             <svg class="sparkline green-line" viewBox="0 0 260 44" data-spark="return"></svg>
           </article>
           <article class="kpi-card">
             <div class="kpi-icon blue"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M16 10h5v6h-5a3 3 0 0 1 0-6zM7 6V4h10v2"/></svg></div>
             <span class="kpi-label">Cash</span>
-            <strong>&#3647;0.00</strong>
-            <span class="kpi-sub">0.00% of portfolio</span>
-            <span class="kpi-trend neutral">Market mode MODE A</span>
+            <strong id="cashValue">&#3647;0.00</strong>
+            <span class="kpi-sub" id="cashWeightLabel">0.00% of portfolio</span>
+            <span class="kpi-trend neutral" id="marketModeLabel">Market mode MODE A</span>
           </article>
         </section>
 
@@ -203,10 +204,10 @@
                 <tfoot>
                   <tr>
                     <td colspan="4">Total Market Value</td>
-                    <td>&#3647;5,311.28</td>
+                    <td id="tableTotalValue">&#3647;5,311.28</td>
                     <td>100.00%</td>
-                    <td class="positive">+13.01%</td>
-                    <td>MODE A</td>
+                    <td class="positive" id="tableTotalReturn">+13.01%</td>
+                    <td id="tableMode">MODE A</td>
                   </tr>
                 </tfoot>
               </table>

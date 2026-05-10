@@ -1,8 +1,8 @@
-const navRows = [
+let navRows = [
   [46098,66.25498349563254,65.54880171494062,0,0],[46099,56.150858308896865,121.39221337639256,-0.004690347335134643,0],[46100,0,119.345620745,-0.01685934026960054,-0.01685934026960054],[46101,292.8144215590037,405.313515900941,-0.05736721934432154,0],[46102,0,405.313515900941,0,0],[46103,0,405.313515900941,0,0],[46104,82.21995793395871,483.0771110697756,-0.010994853589371243,0],[46105,227.753469127404,711.8797439561399,0.002171834961579854,0],[46106,498.9336527820509,1224.930287455628,0.019830443045036426,0],[46107,229.80017511498605,1418.2469920963683,-0.02978411983756863,0],[46108,51.589928723848246,1452.907083644384,-0.0119371571173282,0],[46109,0,1436.768069529703,-0.011108084127581564,-0.011108084127581564],[46110,0,1436.768069529703,0,-0.011108084127581564],[46111,74.52339116090401,1505.7150052985462,-0.0038812495282458826,0],[46112,291.4294,1853.8608347884808,-0.0051,0],[46113,0,1876.9636979908005,0.012462026689805904,0],[46114,0,1879.8015466101824,0.0015119358048424076,0],[46115,0,1882.6817332587452,0.0015321759117375114,0],[46116,0,1880.088298439733,-0.0013775216348029008,-0.0013775216348029008],[46117,0,1880.088298439733,0,-0.0013775216348029008],[46118,416.6273352208,2304.8233840886405,0.004312430663408739,0],[46119,0,2296.7295306321603,-0.003511702246842948,-0.003511702246842948],[46120,0,2709.536741302776,0.17973697170906897,0],[46121,0,2710.508900742524,0.0003587917539292929,0],[46122,0,2727.5700400211267,0.00629444134049105,0],[46123,0,2727.5700400211267,0,0],[46124,0,2736.7450424214044,0.0033638008431147734,0],[46125,274.05801149414003,3022.0567729487125,0.004112081636662455,0],[46126,0,3081.0995102015218,0.01953726937935699,-0.0008012840278320221],[46127,0,3108.4147075244464,0.008865405752876206,0],[46128,0,3117.173757330765,0.00281785110111463,0],[46129,0,3175.103937448087,0.018584199864086985,0],[46130,0,3175.103937448087,0,0],[46131,0,3174.1153947454372,-0.0003113418401805944,-0.0003113418401805944],[46132,0,3161.503187937336,-0.003973455668618748,-0.004283560405799598],[46133,0,3150.2215779796966,-0.003568432257378128,-0.007836707068049243],[46134,400.2216890995499,3630.9917798032498,0.02556915782910124,0],[46135,0,3602.684668605876,-0.007795972261580684,-0.007795972261580684],[46136,336.15291180430313,3983.469672595845,0.012388564720802247,0],[46137,0,3982.210530115173,-0.0003160918957998243,-0.0003160918957998243],[46138,0,3982.210530115173,0,-0.0003160918957998243],[46139,0,4023.9428453945375,0.010479685833726438,0],[46140,0,3985.163864411158,-0.009637060582946026,-0.009637060582946026],[46141,0,3995.20668294222,0.002520051589533696,-0.007141294883252816],[46142,351.1072617629201,4370.235924649188,0.005987670186422254,0],[46143,129.99998540299956,4513.059646149445,0.0029343349691783862,0],[46144,0,4514.861523356245,0.0003992584517107455,0],[46145,0,4514.861523356245,0,0],[46146,0,4943.279138362874,0.09489053269747968,0],[46147,0,5045.199087860011,0.020617882713961252,0],[46148,0,5166.599503708072,0.02406256199882783,0],[46149,0,5166.255293064811,-0.00006662228086659492,-0.00006662228086659492],[46150,0,5310.83306694159,0.027985023130943736,0]
 ];
 
-const holdings = [
+let holdings = [
   { ticker: "SPMO", layer: "Core", shares: "0.1112111", price: "$143.81", value: 515.03, valueText: "\u0e3f515.03", pl: "26.53%", weight: 9.70, signal: "STRONG BUY" },
   { ticker: "SCHD", layer: "Core", shares: "0.4566078", price: "$31.62", value: 464.94, valueText: "\u0e3f464.94", pl: "3.35%", weight: 8.75, signal: "HOLD" },
   { ticker: "NVDA", layer: "Growth", shares: "0.1634117", price: "$215.22", value: 1132.56, valueText: "\u0e3f1,132.56", pl: "14.97%", weight: 21.32, signal: "HOLD" },
@@ -16,7 +16,7 @@ const holdings = [
   { ticker: "CASH", layer: "Safe", shares: "0.0000000", price: "$0.00", value: 0, valueText: "\u0e3f0.00", pl: "-", weight: 0, signal: "HOLD" }
 ];
 
-const signals = [
+let signals = [
   { title: "US Market Trend", text: "MODE A active, broad trend supportive", status: "BULLISH", tone: "bullish" },
   { title: "Momentum", text: "Most growth holdings above trend filters", status: "POSITIVE", tone: "positive" },
   { title: "Volatility", text: "Daily volatility 1.90%", status: "CAUTION", tone: "caution" },
@@ -24,17 +24,129 @@ const signals = [
   { title: "Smart DCA", text: "Strong buy signals visible on selected holdings", status: "ACTIVE", tone: "positive" }
 ];
 
-const monthly = [
+let monthly = [
   { label: "Mar '26", value: 869.76 },
   { label: "Apr '26", value: 3044.47 },
   { label: "May '26", value: 4896.87 }
 ];
 
+let kpis = {
+  portfolioValue: "\u0e3f5,311.28",
+  invested: "\u0e3f4,700.03",
+  profit: "\u0e3f611.25",
+  totalReturn: "13.01%",
+  irr: "361.54%",
+  dailyProfit: "\u0e3f161.75",
+  dailyChange: "2.955%",
+  cash: "\u0e3f0.00",
+  cashWeight: "0.00%",
+  marketMode: "MODE A"
+};
+
+const SHEET_ID = "1rV26pJqw8rMNO0nplvE9K0gsMCotfZ4dgvXs5kgRFDk";
+const DATA_SHEETS = {
+  kpi: "Looker_KPI",
+  holdings: "Looker_Holdings",
+  nav: "Looker_NAV",
+  monthly: "Looker_Monthly",
+  signals: "Looker_Signals"
+};
+
 const colors = ["#0b4f9f", "#2f9e55", "#e5a91a", "#6d63c7", "#98a2b3", "#3b82f6", "#14b8a6"];
 
 function excelDateToJs(serial) {
+  if (serial instanceof Date) return serial;
+  if (typeof serial === "string") {
+    const parsed = new Date(serial);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
   const utcDays = Math.floor(serial - 25569);
   return new Date(utcDays * 86400 * 1000);
+}
+
+function numberFrom(value) {
+  if (typeof value === "number") return value;
+  const cleaned = String(value || "").replace(/[^0-9.-]/g, "");
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function percentText(value) {
+  const text = String(value || "").trim();
+  return text ? text : "0.00%";
+}
+
+function moneyText(value) {
+  const text = String(value || "").trim();
+  return text || "\u0e3f0.00";
+}
+
+function plusMoneyText(value) {
+  const text = moneyText(value);
+  return text.startsWith("-") || text.startsWith("+") ? text : `+${text}`;
+}
+
+function plusPercentText(value) {
+  const text = percentText(value);
+  return text.startsWith("-") || text.startsWith("+") ? text : `+${text}`;
+}
+
+function cleanSignal(value) {
+  return String(value || "HOLD").replace(/[^\w\s()%/-]+/g, "").trim() || "HOLD";
+}
+
+function csvUrl(sheetName) {
+  const sheet = encodeURIComponent(sheetName);
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${sheet}`;
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+    if (char === '"' && quoted && next === '"') {
+      cell += '"';
+      index += 1;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      row.push(cell);
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") index += 1;
+      row.push(cell);
+      if (row.some(item => item !== "")) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+  row.push(cell);
+  if (row.some(item => item !== "")) rows.push(row);
+  return rows;
+}
+
+async function fetchSheet(sheetName) {
+  const response = await fetch(`${csvUrl(sheetName)}&cacheBust=${Date.now()}`, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Cannot load ${sheetName}`);
+  const text = await response.text();
+  if (/^<!doctype html|<html/i.test(text.trim())) throw new Error(`${sheetName} is not published`);
+  return parseCsv(text);
+}
+
+function rowsToObjects(rows) {
+  const [headers, ...body] = rows;
+  return body.map(row => Object.fromEntries(headers.map((header, index) => [header, row[index] || ""])));
+}
+
+function kpiValue(rows, metric, fallback = "") {
+  const found = rows.find(row => row.Metric === metric);
+  return found ? found.Value : fallback;
 }
 
 function pathFromPoints(points) {
@@ -72,6 +184,23 @@ function renderSparklines() {
     const data = index === 0 ? nav : nav.map((value, i) => value - (navRows[i][1] * 5));
     drawSparkline(svg, data, "currentColor");
   });
+}
+
+function renderKpis() {
+  document.getElementById("portfolioValue").textContent = kpis.portfolioValue;
+  document.getElementById("investedLabel").textContent = `vs invested ${kpis.invested}`;
+  document.getElementById("profitLabel").textContent = `${plusMoneyText(kpis.profit)} (${plusPercentText(kpis.totalReturn)})`;
+  document.getElementById("gainValue").textContent = plusMoneyText(kpis.profit);
+  document.getElementById("dailyProfitLabel").textContent = `${plusMoneyText(kpis.dailyProfit)} today`;
+  document.getElementById("returnValue").textContent = plusPercentText(kpis.totalReturn);
+  document.getElementById("irrLabel").textContent = `IRR ${kpis.irr}`;
+  document.getElementById("dailyChangeLabel").textContent = `Daily change ${plusPercentText(kpis.dailyChange)}`;
+  document.getElementById("cashValue").textContent = kpis.cash;
+  document.getElementById("cashWeightLabel").textContent = `${kpis.cashWeight} of portfolio`;
+  document.getElementById("marketModeLabel").textContent = `Market mode ${kpis.marketMode}`;
+  document.getElementById("tableTotalValue").textContent = kpis.portfolioValue;
+  document.getElementById("tableTotalReturn").textContent = plusPercentText(kpis.totalReturn);
+  document.getElementById("tableMode").textContent = kpis.marketMode;
 }
 
 function renderNavChart() {
@@ -233,6 +362,101 @@ function renderSignals() {
   `).join("");
 }
 
+function applyLiveData(datasets) {
+  const kpiRows = rowsToObjects(datasets.kpi);
+  kpis = {
+    portfolioValue: moneyText(kpiValue(kpiRows, "Portfolio Value THB", kpis.portfolioValue)),
+    invested: moneyText(kpiValue(kpiRows, "Total Invested THB", kpis.invested)),
+    profit: moneyText(kpiValue(kpiRows, "Total Profit THB", kpis.profit)),
+    totalReturn: percentText(kpiValue(kpiRows, "Total Return %", kpis.totalReturn)),
+    irr: percentText(kpiValue(kpiRows, "IRR", kpis.irr)),
+    dailyProfit: moneyText(kpiValue(kpiRows, "Daily Profit THB", kpis.dailyProfit)),
+    dailyChange: percentText(kpiValue(kpiRows, "Daily Change %", kpis.dailyChange)),
+    cash: kpis.cash,
+    cashWeight: kpis.cashWeight,
+    marketMode: kpiValue(kpiRows, "Market Mode", kpis.marketMode)
+  };
+
+  const holdingRows = rowsToObjects(datasets.holdings);
+  holdings = holdingRows.map(row => ({
+    ticker: row.Ticker || "N/A",
+    layer: row.Asset_Layer || "Core",
+    shares: row.Total_Shares || "0",
+    price: `$${row.Current_Price_USD || "0.00"}`,
+    value: numberFrom(row.Market_Value_THB),
+    valueText: moneyText(row.Market_Value_THB),
+    pl: percentText(row.PL_Percent),
+    weight: numberFrom(row.Weight),
+    signal: cleanSignal(row.Signal)
+  }));
+
+  const cash = holdings.find(item => item.ticker === "CASH");
+  if (cash) {
+    kpis.cash = cash.valueText;
+    kpis.cashWeight = `${cash.weight.toFixed(2)}%`;
+  }
+
+  navRows = rowsToObjects(datasets.nav).map(row => [
+    row.Date,
+    numberFrom(row.Daily_Invested_THB),
+    numberFrom(row.Cumulative_NAV_THB),
+    numberFrom(row.Daily_Change_Percent) / 100,
+    numberFrom(row.Drawdown_Percent) / 100
+  ]).filter(row => row[2] > 0);
+
+  monthly = rowsToObjects(datasets.monthly).map(row => {
+    const date = new Date(Number(row.Year), Number(row.Month) - 1, 1);
+    return {
+      label: date.toLocaleDateString("en-US", { month: "short", year: "2-digit" }).replace(" ", " '"),
+      value: numberFrom(row.Avg_NAV_THB)
+    };
+  }).filter(item => item.value > 0);
+
+  signals = rowsToObjects(datasets.signals).slice(0, 5).map(row => {
+    const trend = row.Total_Trend || "Neutral";
+    const signal = cleanSignal(row.EMA_Signal);
+    const tone = /bullish|buy|accumulate/i.test(`${trend} ${signal}`) ? "positive" : /down|sell|reduce/i.test(`${trend} ${signal}`) ? "caution" : "neutral";
+    return {
+      title: row.Ticker || "Market Signal",
+      text: `${trend} - ${signal}`,
+      status: tone === "positive" ? "POSITIVE" : tone === "caution" ? "CAUTION" : "NEUTRAL",
+      tone
+    };
+  });
+}
+
+function renderAll() {
+  renderKpis();
+  renderSparklines();
+  renderNavChart();
+  renderAllocation();
+  renderMonthly();
+  renderHoldings();
+  renderSignals();
+}
+
+async function loadLiveData() {
+  const status = document.getElementById("dataStatus");
+  status.textContent = "Loading Google Sheet...";
+  try {
+    const [kpi, holdingsData, nav, monthlyData, signalsData] = await Promise.all([
+      fetchSheet(DATA_SHEETS.kpi),
+      fetchSheet(DATA_SHEETS.holdings),
+      fetchSheet(DATA_SHEETS.nav),
+      fetchSheet(DATA_SHEETS.monthly),
+      fetchSheet(DATA_SHEETS.signals)
+    ]);
+    applyLiveData({ kpi, holdings: holdingsData, nav, monthly: monthlyData, signals: signalsData });
+    renderAll();
+    const now = new Date();
+    document.getElementById("updatedAt").textContent = now.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    status.textContent = "Live from Google Sheet";
+  } catch (error) {
+    status.textContent = "Using saved data";
+    console.warn(error);
+  }
+}
+
 function bindInteractions() {
   let filter = "All";
   const search = document.getElementById("holdingSearch");
@@ -245,15 +469,10 @@ function bindInteractions() {
   });
   search.addEventListener("input", () => renderHoldings(filter, search.value));
   document.getElementById("refreshButton").addEventListener("click", () => {
-    const now = new Date();
-    document.getElementById("updatedAt").textContent = now.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    loadLiveData();
   });
 }
 
-renderSparklines();
-renderNavChart();
-renderAllocation();
-renderMonthly();
-renderHoldings();
-renderSignals();
+renderAll();
 bindInteractions();
+loadLiveData();

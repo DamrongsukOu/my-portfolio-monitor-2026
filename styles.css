@@ -116,6 +116,11 @@ svg {
   font-weight: 500;
 }
 
+#dataStatus {
+  color: var(--muted-soft);
+  font-size: 12px;
+}
+
 .refresh-button {
   display: inline-flex;
   gap: 8px;
