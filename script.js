@@ -474,11 +474,8 @@ function bindInteractions() {
     document.querySelectorAll("#assetTabs button").forEach(tab => tab.classList.toggle("active", tab === button));
     renderHoldings(filter, search.value);
   });
-  document.getElementById("allocationToggle").addEventListener("click", event => {
-    const button = event.target.closest("button");
-    if (!button) return;
-    allocationMode = button.dataset.allocation;
-    document.querySelectorAll("#allocationToggle button").forEach(toggle => toggle.classList.toggle("active", toggle === button));
+  document.getElementById("allocationView").addEventListener("change", event => {
+    allocationMode = event.target.value;
     renderAllocation();
   });
   search.addEventListener("input", () => renderHoldings(filter, search.value));
