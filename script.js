@@ -733,15 +733,19 @@ function applyLiveData(datasets) {
     }
   }
 
-  const cashValueThb = cash ? cash.value : 0;
+  const cashValueThb = cash ? cash.value : numberFrom(kpis.cash);
+  const portfolioValueThb = numberFrom(kpis.portfolioValue);
   const investedValueThb = numberFrom(kpis.invested);
   const marketValueExCash = holdings
-    .filter(item => item.ticker !== "CASH")
+    .filter(item => String(item.ticker).toUpperCase() !== "CASH")
     .reduce((sum, item) => sum + numberFrom(item.value), 0);
-  if (marketValueExCash > 0 && investedValueThb > 0) {
-    const totalProfitExCash = marketValueExCash - investedValueThb;
+  const assetValueExCash = portfolioValueThb > cashValueThb ? portfolioValueThb - cashValueThb : marketValueExCash;
+  let cashNeutralReturn = null;
+  if (assetValueExCash > 0 && investedValueThb > 0) {
+    const totalProfitExCash = assetValueExCash - investedValueThb;
+    cashNeutralReturn = totalProfitExCash / investedValueThb;
     kpis.profit = signedThb(totalProfitExCash);
-    kpis.totalReturn = signedPercent((totalProfitExCash / investedValueThb) * 100, 3);
+    kpis.totalReturn = signedPercent(cashNeutralReturn * 100, 3);
   }
 
   navRows = rowsToObjects(datasets.nav).map(row => [
@@ -763,11 +767,13 @@ function applyLiveData(datasets) {
     kpis.dailyProfit = signedThb(marketProfitToday);
     kpis.dailyChange = signedPercent(previousNav ? (marketProfitToday / previousNav) * 100 : 0);
 
-    const irrValue = xirr([
-      ...navRows.filter(row => numberFrom(row[1]) > 0).map(row => ({ date: row[0], amount: -numberFrom(row[1]) })),
-      { date: latest[0], amount: marketValueExCash || Math.max(0, latestNav - cashValueThb) }
-    ]);
-    if (irrValue !== null) kpis.irr = signedPercent(irrValue * 100, 2);
+    const firstDate = sheetDate(navRows[0][0]);
+    const latestDate = sheetDate(latest[0]);
+    const days = Math.max(1, (latestDate - firstDate) / 86400000);
+    if (cashNeutralReturn !== null && cashNeutralReturn > -0.99 && days >= 7) {
+      const annualizedReturn = ((1 + cashNeutralReturn) ** (365 / days)) - 1;
+      kpis.irr = signedPercent(annualizedReturn * 100, 2);
+    }
   }
 
   monthly = rowsToObjects(datasets.monthly).map(row => {
