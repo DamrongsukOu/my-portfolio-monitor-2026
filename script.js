@@ -22,6 +22,13 @@ let holdings = [
   { ticker: "RKLB", layer: "Alpha", shares: "0.1307652", price: "$105.55", value: 444.47, valueText: "THB 444.47", pl: "44.54%", weight: 8.37, signal: "HOLD" }
 ];
 
+let signalBoard = holdings.map((item, index) => ({
+  ...item,
+  rsi7: index < 2 ? 78 : index < 5 ? 48 : 56,
+  rsi14: index < 2 ? 71 : index < 5 ? 44 : 58,
+  priority: index + 1
+}));
+
 let signals = [
   { title: "US Market Trend", text: "MODE A active, broad trend supportive", status: "BULLISH", tone: "positive" },
   { title: "Momentum", text: "Most growth holdings above trend filters", status: "POSITIVE", tone: "positive" },
@@ -68,6 +75,7 @@ const DATA_SHEETS = {
 };
 
 const colors = ["#25e05d", "#f6c21a", "#4aa3ff", "#ff5148", "#b57cff", "#13b981", "#94a3b8"];
+const MIN_ORDER_USD = 1.5;
 let allocationMode = "sector";
 let activeFilter = "All";
 
@@ -121,6 +129,19 @@ function kpiAny(rows, metrics, fallback = "") {
     return normalized.some(name => metric === name || metric.includes(name));
   });
   return found && found.Value ? found.Value : fallback;
+}
+
+function rowAny(row, names, fallback = "") {
+  const keys = Array.isArray(names) ? names : [names];
+  for (const key of keys) {
+    if (row[key] != null && row[key] !== "") return row[key];
+  }
+  const normalized = Object.fromEntries(Object.entries(row).map(([key, value]) => [key.toLowerCase().replace(/[^a-z0-9]/g, ""), value]));
+  for (const key of keys) {
+    const found = normalized[String(key).toLowerCase().replace(/[^a-z0-9]/g, "")];
+    if (found != null && found !== "") return found;
+  }
+  return fallback;
 }
 
 function signedClass(value) {
@@ -424,19 +445,123 @@ function renderSignals() {
   ).join(""));
 }
 
-function renderSmartDca() {
-  const ranked = holdings
+function fxRate() {
+  const usdValue = holdings
     .filter(item => item.ticker !== "CASH")
-    .slice()
-    .sort((a, b) => signalRank(b.signal) - signalRank(a.signal) || b.weight - a.weight)
-    .slice(0, 3);
-  setHtml("smartDcaList", ranked.map((item, index) => `<div class="mini-row"><span>${index + 1}. ${item.ticker}</span><strong>${item.signal}</strong></div>`).join(""));
+    .reduce((sum, item) => sum + numberFrom(item.shares) * numberFrom(item.price), 0);
+  const thbValue = holdings
+    .filter(item => item.ticker !== "CASH")
+    .reduce((sum, item) => sum + numberFrom(item.value), 0);
+  return usdValue > 0 && thbValue > 0 ? thbValue / usdValue : 32.6;
+}
 
-  const best = ranked[0];
+function parseBudgetInput(value, fx = fxRate()) {
+  const text = String(value || "").trim().toLowerCase();
+  const amount = numberFrom(text);
+  if (!amount) return { input: text, usd: 0, thb: 0, currency: "THB" };
+  const isUsd = text.includes("$") || text.includes("usd") || text.includes("ดอลลาร์");
+  const isThb = text.includes("฿") || text.includes("thb") || text.includes("บาท");
+  if (isUsd && !isThb) return { input: text, usd: amount, thb: amount * fx, currency: "USD" };
+  return { input: text, usd: amount / fx, thb: amount, currency: "THB" };
+}
+
+function formatUsd(value) {
+  return `$${Number(value || 0).toFixed(2)}`;
+}
+
+function formatThb(value) {
+  return `THB ${Math.round(Number(value || 0)).toLocaleString("en-US")}`;
+}
+
+function dcaMultiplier(item) {
+  const signal = String(item.signal || "").toUpperCase();
+  const rsi7 = numberFrom(item.rsi7);
+  const rsi14 = numberFrom(item.rsi14);
+  const hasRsi7 = rsi7 > 0;
+  const hasRsi14 = rsi14 > 0;
+  if (/REDUCE|SELL|OVERBOUGHT/.test(signal) || (hasRsi7 && rsi7 >= 75) || (hasRsi14 && rsi14 >= 75)) return 0;
+  if (/BUY DIP|GOOD PRICE/.test(signal) || (hasRsi7 && rsi7 < 35)) return 1;
+  if (/ACCUMULATE/.test(signal) || (hasRsi14 && rsi14 < 45)) return 0.75;
+  if (/BULLISH|FOLLOW/.test(signal) || (hasRsi7 && rsi7 <= 60)) return 0.5;
+  if (hasRsi7 && rsi7 < 70) return 0.25;
+  return 0;
+}
+
+function dcaReason(item, multiplier) {
+  const signal = cleanSignal(item.signal);
+  const rsi7 = numberFrom(item.rsi7);
+  const rsi14 = numberFrom(item.rsi14);
+  const rsiText = rsi7 || rsi14 ? `${rsi7.toFixed(1)}/${rsi14.toFixed(1)}` : "n/a";
+  if (!multiplier) return `Skip: ${signal}; RSI ${rsiText} ยังไม่ใช่จังหวะซื้อ`;
+  if (multiplier === 1) return `1.0x: RSI ต่ำหรือ BUY DIP; โอกาสดีที่สุดในชุดวันนี้`;
+  if (multiplier === 0.75) return `0.75x: RSI14/สัญญาณสะสมดี แต่ยังไม่ใช่ไม้เต็ม`;
+  if (multiplier === 0.5) return `0.5x: bullish follow ใช้ไม้กลาง ลดความเสี่ยงไล่ราคา`;
+  return `0.25x: สัญญาณอ่อนกว่า ใช้ไม้เล็กเท่านั้น`;
+}
+
+function buildDcaPlan(budgetUsd) {
+  const fx = fxRate();
+  const candidates = signalBoard
+    .filter(item => item.ticker && item.ticker !== "CASH")
+    .map(item => {
+      const multiplier = dcaMultiplier(item);
+      return {
+        ...item,
+        multiplier,
+        reason: dcaReason(item, multiplier),
+        smartDcaUsd: numberFrom(item.smartDcaUsd) || Infinity
+      };
+    })
+    .filter(item => item.multiplier > 0)
+    .sort((a, b) => b.multiplier - a.multiplier || numberFrom(a.priority || 99) - numberFrom(b.priority || 99) || numberFrom(a.rsi7) - numberFrom(b.rsi7))
+    .slice(0, 3);
+
+  const picks = candidates.map(item => ({ ...item, amountUsd: 0 }));
+  let remaining = Number(budgetUsd || 0);
+  let open = picks;
+  for (let round = 0; round < 3 && remaining > 0.01 && open.length; round += 1) {
+    const totalWeight = open.reduce((sum, item) => sum + item.multiplier, 0);
+    open.forEach(item => {
+      const room = Number.isFinite(item.smartDcaUsd) ? Math.max(0, item.smartDcaUsd - item.amountUsd) : Infinity;
+      const planned = remaining * (item.multiplier / totalWeight);
+      item.amountUsd += Math.min(room, planned);
+    });
+    const used = picks.reduce((sum, item) => sum + item.amountUsd, 0);
+    remaining = Math.max(0, Number(budgetUsd || 0) - used);
+    open = picks.filter(item => item.smartDcaUsd - item.amountUsd > 0.01);
+  }
+  return {
+    fx,
+    picks: picks.map(item => ({
+      ...item,
+      amountUsd: Math.round(item.amountUsd * 100) / 100,
+      amountThb: Math.round(item.amountUsd * fx),
+      belowMin: item.amountUsd > 0 && item.amountUsd < MIN_ORDER_USD
+    })),
+    usedUsd: Math.round(picks.reduce((sum, item) => sum + item.amountUsd, 0) * 100) / 100,
+    leftoverUsd: Math.round(Math.max(0, remaining) * 100) / 100
+  };
+}
+
+function renderSmartDca() {
+  const input = document.getElementById("dcaBudgetInput");
+  const budget = parseBudgetInput(input?.value || "");
+  const plan = buildDcaPlan(budget.usd);
+  const rows = budget.usd > 0 ? plan.picks.filter(item => item.amountUsd > 0) : plan.picks;
+  const summary = budget.usd > 0
+    ? `Budget ${formatUsd(budget.usd)} (${formatThb(budget.thb)}), deploy ${formatUsd(plan.usedUsd)}, cash left ${formatUsd(plan.leftoverUsd)}`
+    : `Enter budget or press Cash. Signal is RSI/EMA based, not allocation target only.`;
+  setText("dcaBudgetSummary", summary);
+
+  setHtml("smartDcaList", rows.map((item, index) => `<div class="mini-row dca-plan-row">
+    <span>${index + 1}. <strong>${item.ticker}</strong><small>${item.multiplier}x · RSI ${numberFrom(item.rsi7).toFixed(1)}/${numberFrom(item.rsi14).toFixed(1)} · ${item.reason}${item.belowMin ? " · below DIME minimum" : ""}</small></span>
+    <strong>${budget.usd > 0 ? `${formatUsd(item.amountUsd)}<br><small>${formatThb(item.amountThb)}</small>` : `${item.multiplier}x`}</strong>
+  </div>`).join("") || `<div class="empty">No RSI-based buy setup today. Keep cash.</div>`);
+
+  const best = rows[0];
   if (best) {
-    const isBuy = /buy|accumulate/i.test(best.signal);
-    setText("todaySignal", isBuy ? "Strong Buy" : "Hold / Wait");
-    setText("todaySignalText", `${best.ticker}: ${best.signal}. Use this as sheet radar; confirm with live market before execution.`);
+    setText("todaySignal", budget.usd > 0 ? "Sizing Ready" : "Signal Ready");
+    setText("todaySignalText", `${best.ticker}: ${best.multiplier}x from RSI/EMA. Use this as sizing simulation before real buy.`);
   }
 }
 
@@ -478,6 +603,18 @@ function signalRank(signal) {
 
 function applyLiveData(datasets) {
   const kpiRows = rowsToObjects(datasets.kpi);
+  const rawSignals = rowsToObjects(datasets.signals);
+  const signalRows = rawSignals.map(row => ({
+    ticker: rowAny(row, ["Ticker", "Symbol"], "N/A"),
+    totalTrend: rowAny(row, ["Total_Trend", "Total Trend", "Trend"], ""),
+    signal: cleanSignal(rowAny(row, ["Signal", "EMA_Signal", "EMA Signal"], "HOLD")),
+    rsi7: numberFrom(rowAny(row, ["RSI 7", "RSI7", "RSI_7", "RSI7_Value"], 0)),
+    rsi14: numberFrom(rowAny(row, ["RSI 14", "RSI14", "RSI_14", "RSI14_Value"], 0)),
+    priority: numberFrom(rowAny(row, ["Priority", "Rank"], 99)),
+    smartDcaUsd: numberFrom(rowAny(row, ["Smart DCA $", "Smart_DCA_USD", "Smart DCA USD", "Smart_DCA"], 0))
+  })).filter(item => item.ticker && item.ticker !== "N/A");
+  const signalMap = new Map(signalRows.map(item => [String(item.ticker).toUpperCase(), item]));
+
   kpis = {
     portfolioValue: moneyText(kpiValue(kpiRows, "Portfolio Value THB", kpis.portfolioValue)),
     invested: moneyText(kpiValue(kpiRows, "Total Invested THB", kpis.invested)),
@@ -510,13 +647,36 @@ function applyLiveData(datasets) {
     valueText: moneyText(row.Market_Value_THB),
     pl: percentText(row.PL_Percent),
     weight: numberFrom(row.Weight),
-    signal: cleanSignal(row.Signal)
+    signal: cleanSignal(row.Signal),
+    rsi7: numberFrom(rowAny(row, ["RSI 7", "RSI7", "RSI_7"], 0)),
+    rsi14: numberFrom(rowAny(row, ["RSI 14", "RSI14", "RSI_14"], 0)),
+    priority: numberFrom(rowAny(row, ["Priority", "Rank"], 99)),
+    smartDcaUsd: numberFrom(rowAny(row, ["Smart DCA $", "Smart_DCA_USD", "Smart DCA USD", "Smart_DCA"], 0))
   })).filter(item => item.ticker && item.ticker !== "N/A");
+
+  holdings = holdings.map(item => {
+    const signal = signalMap.get(String(item.ticker).toUpperCase());
+    if (!signal) return item;
+    return {
+      ...item,
+      signal: cleanSignal(signal.signal || item.signal),
+      rsi7: signal.rsi7 || item.rsi7,
+      rsi14: signal.rsi14 || item.rsi14,
+      priority: signal.priority || item.priority,
+      smartDcaUsd: signal.smartDcaUsd || item.smartDcaUsd,
+      totalTrend: signal.totalTrend
+    };
+  });
+  signalBoard = holdings.filter(item => item.ticker !== "CASH");
 
   const cash = holdings.find(item => item.ticker === "CASH");
   if (cash) {
     kpis.cash = cash.valueText;
     kpis.cashWeight = `${cash.weight.toFixed(2)}%`;
+    if (Math.abs(numberFrom(kpis.dailyProfit) - cash.value) < 0.5) {
+      kpis.dailyProfit = "THB 0.00";
+      kpis.dailyChange = "0.00%";
+    }
   }
 
   navRows = rowsToObjects(datasets.nav).map(row => [
@@ -535,12 +695,12 @@ function applyLiveData(datasets) {
     };
   }).filter(item => item.value > 0);
 
-  signals = rowsToObjects(datasets.signals).slice(0, 6).map(row => {
-    const trend = row.Total_Trend || "Neutral";
-    const signal = cleanSignal(row.EMA_Signal);
+  signals = signalRows.slice(0, 6).map(row => {
+    const trend = row.totalTrend || "Neutral";
+    const signal = cleanSignal(row.signal);
     const tone = /bullish|buy|accumulate/i.test(`${trend} ${signal}`) ? "positive" : /down|sell|reduce|overbought/i.test(`${trend} ${signal}`) ? "caution" : "neutral";
     return {
-      title: row.Ticker || "Market Signal",
+      title: row.ticker || "Market Signal",
       text: `${trend} - ${signal}`,
       status: tone === "positive" ? "POSITIVE" : tone === "caution" ? "CAUTION" : "NEUTRAL",
       tone
@@ -603,6 +763,16 @@ function bindInteractions() {
   });
   search.addEventListener("input", () => renderHoldings(activeFilter, search.value));
   document.getElementById("refreshButton").addEventListener("click", loadLiveData);
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    const next = document.body.dataset.theme === "light" ? "dark" : "light";
+    setTheme(next);
+  });
+  document.getElementById("dcaBudgetInput").addEventListener("input", renderSmartDca);
+  document.getElementById("useCashButton").addEventListener("click", () => {
+    const input = document.getElementById("dcaBudgetInput");
+    input.value = kpis.cash || "";
+    renderSmartDca();
+  });
   document.querySelectorAll("[data-jump]").forEach(button => {
     button.addEventListener("click", () => {
       if (button.dataset.jump === "overview") {
@@ -615,6 +785,23 @@ function bindInteractions() {
   });
 }
 
+function setTheme(theme) {
+  document.body.dataset.theme = theme;
+  try {
+    localStorage.setItem("portfolioTheme", theme);
+  } catch (error) {
+    console.warn(error);
+  }
+}
+
+function initTheme() {
+  try {
+    setTheme(localStorage.getItem("portfolioTheme") || "dark");
+  } catch (error) {
+    setTheme("dark");
+  }
+}
+
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
@@ -625,6 +812,7 @@ function setHtml(id, value) {
   if (el) el.innerHTML = value;
 }
 
+initTheme();
 renderAll();
 bindInteractions();
 loadLiveData();
