@@ -352,7 +352,7 @@ p {
 }
 
 .dashboard-grid {
-  grid-template-columns: 1.05fr 1.2fr 1.05fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 14px;
 }
 
@@ -383,18 +383,19 @@ p {
 
 .hero-card,
 .stat-card,
-.split-card,
+.risk-card,
 .card {
   padding: 18px;
 }
 
 .hero-card {
   min-height: 158px;
+  padding-right: 170px;
 }
 
 .card-label,
 .stat-card span,
-.split-card span,
+.risk-card span,
 .eyebrow {
   color: var(--soft);
   font-size: 12px;
@@ -410,7 +411,8 @@ p {
 .hero-card strong {
   display: block;
   margin-top: 8px;
-  font-size: clamp(36px, 5vw, 52px);
+  max-width: 100%;
+  font-size: clamp(30px, 3.4vw, 42px);
   line-height: 0.96;
 }
 
@@ -426,7 +428,7 @@ p {
   position: absolute;
   right: 16px;
   bottom: 15px;
-  width: 42%;
+  width: 34%;
   height: 62px;
   color: var(--green);
 }
@@ -439,7 +441,7 @@ p {
 }
 
 .stat-card strong,
-.split-card strong {
+.risk-card strong {
   font-size: 26px;
 }
 
@@ -447,7 +449,6 @@ p {
   color: var(--muted);
 }
 
-.danger strong,
 .negative {
   color: var(--red);
 }
@@ -456,7 +457,7 @@ p {
 .neutral { color: var(--soft); }
 .warning { color: var(--amber); }
 
-.split-card {
+.risk-card {
   min-height: 158px;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -464,17 +465,24 @@ p {
   align-items: center;
 }
 
-.split-card > div + div {
-  border-left: 1px solid var(--line);
-  padding-left: 16px;
+.risk-card > div {
+  min-width: 0;
 }
 
-.split-card strong {
-  display: block;
-  margin-top: 9px;
-  color: var(--green);
-  font-size: 36px;
+.risk-card > div:nth-child(even) {
+  border-left: 1px solid var(--line);
+  padding-left: 14px;
 }
+
+.risk-card strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--green);
+  font-size: clamp(22px, 2.6vw, 34px);
+  line-height: 1;
+}
+
+.risk-card strong.negative { color: var(--red); }
 
 .section-head {
   justify-content: space-between;
@@ -500,6 +508,10 @@ select {
 .performance-card,
 .indicators-card {
   min-height: 330px;
+}
+
+.performance-card {
+  grid-column: span 2;
 }
 
 .allocation-body {
@@ -584,6 +596,35 @@ select {
   font-size: 38px;
 }
 
+.benchmark-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.benchmark-strip div {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px 0 0;
+}
+
+.benchmark-strip div + div {
+  border-left: 1px solid rgba(148, 163, 184, 0.12);
+  padding-left: 14px;
+}
+
+.benchmark-strip span {
+  color: var(--soft);
+  font-size: 13px;
+}
+
+.benchmark-strip strong {
+  color: var(--green);
+  font-size: 18px;
+}
+
 .line-chart,
 .bar-chart {
   width: 100%;
@@ -635,7 +676,8 @@ select {
 
 .signal-card,
 .dca-card,
-.health-card {
+.health-card,
+.quick-alerts-card {
   min-height: 188px;
 }
 
@@ -848,6 +890,23 @@ tfoot td {
   min-height: 310px;
 }
 
+.quick-alerts-card .section-head {
+  margin-bottom: 6px;
+}
+
+.compact-alert-list {
+  gap: 6px;
+}
+
+.compact-alert-list .alert-row {
+  min-height: 42px;
+  padding: 8px 0;
+}
+
+.compact-alert-list .alert-row p {
+  display: none;
+}
+
 .alert-row {
   align-items: flex-start;
 }
@@ -894,6 +953,7 @@ tfoot td {
   .hero-grid { grid-template-columns: 1fr 1fr; }
   .dashboard-grid,
   .lower-grid { grid-template-columns: 1fr 1fr; }
+  .performance-card,
   .indicators-card,
   .holdings-card { grid-column: span 2; }
 }
@@ -931,19 +991,22 @@ tfoot td {
     grid-template-columns: 1fr;
   }
   .indicators-card,
+  .performance-card,
   .holdings-card {
     grid-column: auto;
   }
   .hero-card {
     min-height: 146px;
+    padding-right: 15px;
+    padding-bottom: 80px;
   }
   .hero-card strong {
-    font-size: 34px;
+    font-size: 32px;
   }
   .sparkline {
-    width: 50%;
+    width: 62%;
   }
-  .split-card {
+  .risk-card {
     grid-template-columns: 1fr 1fr;
   }
   .allocation-body,
@@ -1011,15 +1074,22 @@ tfoot td {
     display: none;
   }
   .stat-card,
-  .split-card,
+  .risk-card,
   .card {
     padding: 15px;
   }
   .stat-card strong,
-  .split-card strong {
+  .risk-card strong {
     font-size: 24px;
   }
-  .split-card strong {
+  .risk-card strong {
     font-size: 28px;
+  }
+  .benchmark-strip {
+    grid-template-columns: 1fr;
+  }
+  .benchmark-strip div + div {
+    border-left: 0;
+    padding-left: 0;
   }
 }
