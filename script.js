@@ -485,6 +485,48 @@ function signedPercent(value, digits = 3) {
   return `${sign}${Math.abs(amount).toFixed(digits)}%`;
 }
 
+function sheetDate(value) {
+  if (value instanceof Date) return value;
+  if (typeof value === "number") return new Date(Date.UTC(1899, 11, 30) + value * 86400000);
+  const text = String(value || "").trim();
+  const match = text.match(/Date\((\d+),(\d+),(\d+)/);
+  if (match) return new Date(Number(match[1]), Number(match[2]), Number(match[3]));
+  const parsed = new Date(text);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
+function xirr(cashflows) {
+  const flows = cashflows
+    .filter(item => Number.isFinite(item.amount) && item.amount !== 0)
+    .map(item => ({ ...item, date: sheetDate(item.date) }));
+  if (!flows.some(item => item.amount < 0) || !flows.some(item => item.amount > 0)) return null;
+  const firstDate = flows[0].date;
+  const yearsFromStart = date => (date - firstDate) / 31557600000;
+  const npv = rate => flows.reduce((sum, item) => sum + item.amount / ((1 + rate) ** yearsFromStart(item.date)), 0);
+  let low = -0.9999;
+  let high = 10;
+  let lowValue = npv(low);
+  let highValue = npv(high);
+  for (let i = 0; i < 20 && lowValue * highValue > 0; i += 1) {
+    high *= 2;
+    highValue = npv(high);
+  }
+  if (!Number.isFinite(lowValue) || !Number.isFinite(highValue) || lowValue * highValue > 0) return null;
+  for (let i = 0; i < 80; i += 1) {
+    const mid = (low + high) / 2;
+    const midValue = npv(mid);
+    if (Math.abs(midValue) < 0.01) return mid;
+    if (lowValue * midValue <= 0) {
+      high = mid;
+      highValue = midValue;
+    } else {
+      low = mid;
+      lowValue = midValue;
+    }
+  }
+  return (low + high) / 2;
+}
+
 function dcaMultiplier(item) {
   const signal = String(item.signal || "").toUpperCase();
   const rsi7 = numberFrom(item.rsi7);
@@ -691,6 +733,17 @@ function applyLiveData(datasets) {
     }
   }
 
+  const cashValueThb = cash ? cash.value : 0;
+  const investedValueThb = numberFrom(kpis.invested);
+  const marketValueExCash = holdings
+    .filter(item => item.ticker !== "CASH")
+    .reduce((sum, item) => sum + numberFrom(item.value), 0);
+  if (marketValueExCash > 0 && investedValueThb > 0) {
+    const totalProfitExCash = marketValueExCash - investedValueThb;
+    kpis.profit = signedThb(totalProfitExCash);
+    kpis.totalReturn = signedPercent((totalProfitExCash / investedValueThb) * 100, 3);
+  }
+
   navRows = rowsToObjects(datasets.nav).map(row => [
     row.Date,
     numberFrom(row.Daily_Invested_THB),
@@ -705,10 +758,16 @@ function applyLiveData(datasets) {
     const previousNav = numberFrom(previous[2]);
     const latestNav = numberFrom(latest[2]);
     const cashFlowToday = numberFrom(latest[1]);
-    const cashBudgetThb = cashFlowToday ? 0 : numberFrom(kpis.cash);
+    const cashBudgetThb = cashFlowToday ? 0 : cashValueThb;
     const marketProfitToday = latestNav - previousNav - cashFlowToday - cashBudgetThb;
     kpis.dailyProfit = signedThb(marketProfitToday);
     kpis.dailyChange = signedPercent(previousNav ? (marketProfitToday / previousNav) * 100 : 0);
+
+    const irrValue = xirr([
+      ...navRows.filter(row => numberFrom(row[1]) > 0).map(row => ({ date: row[0], amount: -numberFrom(row[1]) })),
+      { date: latest[0], amount: marketValueExCash || Math.max(0, latestNav - cashValueThb) }
+    ]);
+    if (irrValue !== null) kpis.irr = signedPercent(irrValue * 100, 2);
   }
 
   monthly = rowsToObjects(datasets.monthly).map(row => {
