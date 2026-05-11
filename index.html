@@ -185,16 +185,26 @@
             <div id="signalsList" class="indicator-list"></div>
           </article>
 
-          <article class="card signal-card" id="dca">
-            <span class="eyebrow">Today's signal</span>
-            <div class="signal-main">
-              <span class="gem" aria-hidden="true"></span>
-              <div>
-                <strong id="todaySignal">Strong Buy</strong>
-                <p id="todaySignalText">Reading Google Sheet signal board.</p>
+          <div class="signal-stack">
+            <article class="card signal-card" id="dca">
+              <span class="eyebrow">Today's signal</span>
+              <div class="signal-main">
+                <span class="gem" aria-hidden="true"></span>
+                <div>
+                  <strong id="todaySignal">Strong Buy</strong>
+                  <p id="todaySignalText">Reading Google Sheet signal board.</p>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+
+            <article class="card health-card">
+              <span class="eyebrow">Portfolio health</span>
+              <div class="health-layout">
+                <div class="health-ring"><strong id="healthScore">8.6</strong><span>/10</span></div>
+                <div id="healthMetrics" class="health-metrics"></div>
+              </div>
+            </article>
+          </div>
 
           <article class="card dca-card">
             <div class="section-head">
@@ -206,20 +216,12 @@
             <div class="dca-simulator">
               <label for="dcaBudgetInput">Budget today</label>
               <div class="dca-input-row">
-                <input id="dcaBudgetInput" type="text" inputmode="decimal" placeholder="$10 or 1,200 THB">
+                <input id="dcaBudgetInput" type="text" inputmode="decimal" placeholder="$10">
                 <button id="useCashButton" type="button">Cash</button>
               </div>
               <p id="dcaBudgetSummary">Enter budget to simulate sizing.</p>
             </div>
             <div id="smartDcaList" class="mini-list"></div>
-          </article>
-
-          <article class="card health-card">
-            <span class="eyebrow">Portfolio health</span>
-            <div class="health-layout">
-              <div class="health-ring"><strong id="healthScore">8.6</strong><span>/10</span></div>
-              <div id="healthMetrics" class="health-metrics"></div>
-            </div>
           </article>
 
         </section>
@@ -300,6 +302,6 @@
     <button data-jump="alerts" type="button"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span>Alerts</span></button>
   </nav>
 
-  <script src="./script.js?v=20260511j"></script>
+  <script src="./script.js?v=20260511k"></script>
 </body>
 </html>
