@@ -352,7 +352,7 @@ p {
 }
 
 .dashboard-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 35fr) minmax(0, 40fr) minmax(0, 25fr);
   margin-top: 14px;
 }
 
@@ -510,20 +510,16 @@ select {
   min-height: 270px;
 }
 
-.performance-card {
-  grid-column: span 2;
-}
-
 .allocation-body {
   display: grid;
-  grid-template-columns: 150px 1fr;
+  grid-template-columns: 170px minmax(150px, 1fr);
   gap: 14px;
   align-items: center;
 }
 
 .donut-wrap {
   position: relative;
-  width: 150px;
+  width: 170px;
   max-width: 100%;
 }
 
@@ -676,6 +672,43 @@ select {
 .indicator-row strong,
 .mini-row strong {
   text-align: right;
+}
+
+.indicator-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 140px;
+  text-align: right;
+}
+
+.status-pill {
+  min-width: 62px;
+  min-height: 28px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.status-pill.low {
+  color: var(--green);
+  background: rgba(37, 224, 93, 0.18);
+}
+
+.status-pill.high,
+.status-pill.fear {
+  color: var(--red);
+  background: rgba(255, 81, 72, 0.16);
+}
+
+.status-pill.greed {
+  color: var(--amber);
+  background: rgba(246, 194, 26, 0.18);
 }
 
 .signal-card,
@@ -939,7 +972,6 @@ tfoot td {
   .hero-grid { grid-template-columns: 1fr 1fr; }
   .dashboard-grid,
   .lower-grid { grid-template-columns: 1fr 1fr; }
-  .performance-card,
   .indicators-card,
   .holdings-card { grid-column: span 2; }
 }
@@ -977,7 +1009,6 @@ tfoot td {
     grid-template-columns: 1fr;
   }
   .indicators-card,
-  .performance-card,
   .holdings-card {
     grid-column: auto;
   }
